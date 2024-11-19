@@ -22,12 +22,12 @@ class PostionalEmbedding(nn.Module):
         self.encoding[:, 1::2] = torch.cos(pos / (10000 ** (_2i / d_model)))
 
     def forward(self, x):
-        batch_size, seq_len, _ = x.size()
+        batch_size, seq_len = x.size()
         return self.encoding[:seq_len, :]
     
 if __name__ == "__main__":
-    x = torch.rand(2, 4, 16)
-    embedding = PostionalEmbedding(d_model=x.size()[-1], max_len=1024)
+    x = torch.randint(low=1,high=100, size=(4,16))
+    embedding = PostionalEmbedding(d_model=16, max_len=1024)
     out = embedding(x)
     print(x)
     print(out)

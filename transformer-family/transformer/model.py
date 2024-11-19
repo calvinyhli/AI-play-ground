@@ -47,8 +47,10 @@ class Decoder(nn.Module):
         return output
 
 class transformer(nn.Module):
-    def __init__(self, vocab_size, max_len, d_model, d_hidden, n_head, n_layers, drop_prob) -> None:
+    def __init__(self, src_pad_idx, trg_pad_idx, vocab_size, max_len, d_model, d_hidden, n_head, n_layers, drop_prob) -> None:
         super().__init__()
+        self.src_pad_idx = src_pad_idx
+        self.trg_pad_idx = trg_pad_idx
         self.Encoder = Encoder(vocab_size=vocab_size,
                                max_len=max_len,
                                d_model=d_model,
@@ -73,7 +75,7 @@ class transformer(nn.Module):
     def trg_mask(self, trg):
         trg_pad_mask = (trg != self.trg_pad_idx).unsqueeze(1).unsqueeze(3)
         seq_len = trg.shape[-1]
-        trg_sub_mask = torch.tril(torch.ones(seq_len, seq_len))
+        trg_sub_mask = torch.tril(torch.ones(seq_len, seq_len)).to(torch.int)
         trg_mask = trg_pad_mask & trg_sub_mask
         print(trg_mask)
         return trg_mask
@@ -86,7 +88,9 @@ class transformer(nn.Module):
         return output
 
 if __name__ == "__main__":
-    net = transformer(vocab_size=128, 
+    net = transformer(src_pad_idx=1,
+                      trg_pad_idx=1,
+                      vocab_size=128, 
                       max_len=64, 
                       d_model=8, 
                       d_hidden=16, 
@@ -94,8 +98,8 @@ if __name__ == "__main__":
                       n_layers=1, 
                       drop_prob=0.1)
     
-    src = torch.randint((4,8))
-    trg = torch.randint((4,8))
+    src = torch.randint(low=0, high=128, size=(4,32))
+    trg = torch.randint(low=0, high=128, size=(4,32))
     print(src)
 
     output = net(src, trg)
